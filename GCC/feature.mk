@@ -45,7 +45,7 @@ MTK_BT_CODEC_ENABLED = y
 MTK_PMT_ENABLE = y
 
 # CTP module on
-MTK_CTP_ENABLE = y
+MTK_CTP_ENABLE = n
 # debug level: none, error, warning, and info
 MTK_DEBUG_LEVEL = info
 

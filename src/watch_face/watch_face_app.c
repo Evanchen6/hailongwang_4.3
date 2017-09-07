@@ -50,6 +50,9 @@
 #include "memory_attribute.h"
 #include "bsp_ctp.h"
 
+//add by chenchen
+#include "hal_keypad.h"
+
 #define IMG_UPDATE_HEIGHT 49
 #define IMG_UPDATE_WIDTH 320  /* Set to the MAX LCD size for dynamic adjust the LCD size*/
 /*40*4+16+24*2*/
@@ -65,6 +68,8 @@ typedef enum{
 static QueueHandle_t g_wtf_queue_handle;
 static bool g_wf_is_show_screen;
 static bool g_wf_is_task_need_delete;
+
+
 ATTR_RWDATA_IN_NONCACHED_RAM_4BYTE_ALIGN uint8_t g_wf_time_update_area_img[IMG_UPDATE_HEIGHT * IMG_UPDATE_WIDTH/8];
 static uint8_t g_wf_witdh_offset;
 
@@ -310,6 +315,7 @@ static uint32_t wf_app_get_lcd_size(wf_app_lcd_type_t type)
  static void wf_app_rtc_init(void)
  {
      hal_rtc_status_t result = hal_rtc_init();
+	 wf_app_log("chenchen rtc init : %d", result);
      if (result != HAL_RTC_STATUS_OK) {
          wf_app_log("rtc init failed : %d", result);
          return;
@@ -332,12 +338,65 @@ void wf_app_init(void)
 
 }
 
+
+static void wf_app_keypad_event_handler(hal_keypad_event_t* keypad_event,void* user_data)
+{
+    static int32_t temp_index;
+/*
+	keyvalue
+	13 0xd ---enter
+	14 0xe ---back
+	17 0x11---up
+	18 0x12---down
+*/
+
+//	GRAPHICLOG("[chenchenwf_app_keypad_event_handler key state=%d, position=%d\r\n", (int)keypad_event->state, (int)keypad_event->key_data);
+	LOG_E(common, "chenchen wf_app_keypad handler %d",keypad_event->key_data);
+
+	if (keypad_event->key_data == 0xd && keypad_event->state == 0){
+		temp_index = 0;
+	} else if (keypad_event->key_data == 0xe && keypad_event->state == 0){
+		temp_index = 1;
+	} else if (keypad_event->key_data == 0x11 && keypad_event->state == 0){
+		temp_index = 2;
+	} else if (keypad_event->key_data == 0x12 && keypad_event->state == 0){
+		temp_index = 3;
+	}
+
+	switch (temp_index){
+		case -1:
+			return;
+		case -2:
+//			main_screen_scroll_to_prevoius_page();
+			break;
+		case -3:
+//			main_screen_scroll_to_next_page();
+			break;
+		case 0:
+			break;
+		default:
+            break;
+		}
+	g_wf_is_show_screen = false;
+	BSP_LCD_ClearScreen(0);
+    show_main_screen();
+
+}
+
+//add by chenchen
+void wf_event_handler(message_id_enum event_id, int32_t param1, void* param2)
+{
+	LOG_E(common, "chenchen wf event handler show");
+	//wf_app_task_enable_show();
+}
 void wf_app_task_enable_show(void)
 {
-    BSP_LCD_ClearScreen(0);
+	LOG_E(common, "chenchen wf task enable show");
+	BSP_LCD_ClearScreen(0);
     demo_ui_register_touch_event_callback(NULL, NULL);
+	demo_ui_register_keypad_event_callback(wf_app_keypad_event_handler, NULL);
     g_wf_is_show_screen = true;
-    g_wf_is_task_need_delete = true;
+    g_wf_is_task_need_delete = false;
     xTaskCreate(wf_app_task, WF_APP_TASK_NAME, WF_APP_TASK_STACKSIZE/(( uint32_t )sizeof( StackType_t )), NULL, WF_APP_TASK_PRIO, NULL);
 }
 
@@ -347,10 +406,11 @@ void wf_app_task(void *arg)
 {
     uint8_t event;
     hal_rtc_time_t time;
+			
     wf_app_rtc_init();
     while(1) { /*receive message/semphore from RTC LISR*/
-    	   if ( xQueueReceive(g_wtf_queue_handle, &event, portMAX_DELAY) == pdPASS) {
-               //LOG_I(common,"app task receive event %d", event);
+		   if ( xQueueReceive(g_wtf_queue_handle, &event, portMAX_DELAY) == pdPASS) {
+               LOG_I(common,"app task receive event %d", event);
             if (event == WF_EVENT_RTC) {
                 if (g_wf_is_task_need_delete == true) {
 					BSP_Backlight_deinit();
@@ -368,7 +428,7 @@ void wf_app_task(void *arg)
                 wf_app_update_time(&time);
             }
     	   }
-      
+
     }
 
 }

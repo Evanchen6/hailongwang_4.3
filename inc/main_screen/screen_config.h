@@ -48,7 +48,7 @@
 #ifdef SENSOR_DEMO
 {show_sensor_ready_to_connect_screen, sensor_event_handler, "Sensor Subsystem"},
 #endif
-{wf_app_task_enable_show, NULL, "Watch Face"},
+{wf_app_task_enable_show, wf_event_handler, "Watch Face"},
 
 #endif
 
@@ -58,5 +58,7 @@
 MESSAGE_ID_GNSS_POSITION,
 MESSAGE_ID_GNSS_NMEA,
 MESSAGE_ID_BT_AUDIO,
+MESSAGE_ID_WATCH_FACE,
+
 #endif
 

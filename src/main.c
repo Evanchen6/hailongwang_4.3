@@ -419,13 +419,14 @@ hal_uart_status_t bt_io_uart_init_ex(hal_uart_port_t port)
     return ret;
 }
 
+#if 0
 // Callback function. This function should be registered with #hal_keypad_register_callback().
 void user_keypad_callback (void *user_data)
 {
      hal_keypad_event_t keypad_event;
      hal_keypad_get_key(&keypad_event);
 }
-
+#endif
 
 /**
   * @brief  Main program
@@ -434,7 +435,7 @@ void user_keypad_callback (void *user_data)
   */
 int main(void)
 {
-    int user_data[10];
+//    int user_data[10];
 	/* Do system initialization, eg: hardware, nvdm. */
     system_init();
 
@@ -464,6 +465,7 @@ int main(void)
     usb_boot_init();
 #endif
 
+#if 0
 #ifdef MTK_KEYPAD_ENABLE
 	keypad_custom_init();
 
@@ -472,7 +474,7 @@ int main(void)
 	}
 	hal_keypad_enable(); 
 #endif
-
+#endif
 
 #ifdef MTK_SMART_BATTERY_ENABLE
     battery_message_create_task();
