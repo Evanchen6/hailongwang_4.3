@@ -578,6 +578,7 @@ void show_main_screen()
 {
     static int32_t is_init;
 //	static int32_t temp_index;
+	static int32_t is_wf_screen;
     curr_event_handler = main_screen_event_handle;
     demo_ui_register_touch_event_callback(main_screen_pen_event_handler, NULL);
 	demo_ui_register_keypad_event_callback(main_screen_keypad_event_handler, NULL);
@@ -596,13 +597,15 @@ void show_main_screen()
     gdi_font_engine_set_text_color(main_screen_cntx.color);
     
     GRAPHICLOG("show_main_screen");
-/*	
-	temp_index = 0;
-	curr_event_handler = demo_item[temp_index].event_handle_f;
-	if (demo_item[temp_index].show_screen_f) {
-	     demo_item[temp_index].show_screen_f();
-	 }
-*/
+
     main_screen_draw();
+
+	if (!is_wf_screen) {
+//	curr_event_handler = demo_item[4].event_handle_f;
+		is_wf_screen = 1;
+		if (demo_item[4].show_screen_f) {
+	     	demo_item[4].show_screen_f();
+	 	}
+	}
 }
 
